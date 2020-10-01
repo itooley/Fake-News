@@ -1,0 +1,61 @@
+---
+title: "Isabelle"
+author: "Isabelle Tooley"
+date: "9/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DataExplorer)
+library(ggplot2)
+library(caret)
+```
+
+
+Read in data
+```{r}
+news_train <- read_csv("train.csv")
+news_test <- read_csv("test.csv")
+
+news <- bind_rows(train = news_train, test = news_test, .id = "Set") %>% mutate(label = as.factor(label))
+```
+
+
+All the articles missing a title are 1s -- create indicator variable
+```{r}
+sum(news_train %>%
+  filter(is.na(title)) %>%
+  pull(label))
+
+news <- news %>%
+  mutate(missing_title = if_else(is.na(title), 1, 0))
+```
+
+All the articles missing text are 1s -- create indicator variable
+```{r}
+sum(news_train %>%
+  filter(is.na(text)) %>%
+  pull(label))
+
+news <- news %>%
+  mutate(missing_text = if_else(is.na(text), 1, 0))
+```
+
+Almost all the articles with a 'nan' author are 1s -- create indicator variable
+```{r}
+sum(news_train %>%
+  filter(author == "nan") %>%
+  pull(label))
+
+news <- news %>%
+  mutate(author = na_if(author, "nan"))
+
+news <- news %>%
+  mutate(missing_author = if_else(is.na(author), 1, 0))
+```
+
+
+
+
